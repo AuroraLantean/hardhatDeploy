@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "src/Token.sol": {
+      "content": "// SPDX-License-Identifier: MIT\n// The line above is recommended and let you define the license of your contract\n// Solidity files have to start with this pragma.\n// It will be used by the Solidity compiler to validate its version.\npragma solidity ^0.7.6;\n\n\n// This is the main building block for smart contracts.\ncontract Token {\n    // Some string type variables to identify the token.\n    // The `public` modifier makes a variable readable from outside the contract.\n    string public name = \"Mars Coin\";\n    string public symbol = \"MARS\";\n    uint256 public decimals = 18;\n    // The fixed amount of tokens stored in an unsigned integer type variable.\n    uint256 public totalSupply = 1000000;\n\n    // An address type variable is used to store ethereum accounts.\n    address public owner;\n\n    // A mapping is a key/value map. Here we store each account balance.\n    mapping(address => uint256) balances;\n    mapping (address => mapping (address => uint256)) public allowance;\n\n    event Transfer(address indexed from, address indexed to, uint256 value);\n\n    event Approval(address indexed owner, address indexed spender, uint256 value);\n    /**\n     * Contract initialization.\n     *\n     * The `constructor` is executed only once when the contract is created.\n     */\n    constructor(address _owner) {\n        // The totalSupply is assigned to transaction sender, which is the account\n        // that is deploying the contract.\n        balances[_owner] = totalSupply;\n        owner = _owner;\n    }\n\n    function _msgSender() internal view returns (address) {\n        return msg.sender;\n    }\n    /**\n     * A function to transfer tokens.\n     *\n     * The `external` modifier makes a function *only* callable from outside\n     * the contract.\n     */\n    function _transfer(address sender, address recipient, uint256 amount) internal returns (bool) {\n        require(sender != address(0), \"ERC20: transfer from the zero address\");\n        require(recipient != address(0), \"ERC20: transfer to the zero address\");\n\n        uint256 senderBalance = balances[sender];\n        require(senderBalance >= amount, \"ERC20: transfer amount exceeds balance\");\n        balances[sender] = senderBalance - amount;\n        balances[recipient] += amount;\n\n        emit Transfer(sender, recipient, amount);\n        return true;\n    }\n\n    function transfer(address recipient, uint256 amount) external returns (bool) {\n        _transfer(_msgSender(), recipient, amount);\n        return true;\n    }\n\n    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool) {\n        _transfer(sender, recipient, amount);\n\n        uint256 currentAllowance = allowance[sender][_msgSender()];\n        require(currentAllowance >= amount, \"ERC20: transfer amount exceeds allowance\");\n        approve(sender, _msgSender(), currentAllowance - amount);\n\n        return true;\n    }\n\n\n    function approve(address _owner, address spender, uint256 amount) public {\n        require(_owner != address(0), \"ERC20: approve from the zero address\");\n        require(spender != address(0), \"ERC20: approve to the zero address\");\n\n        allowance[_owner][spender] = amount;\n        emit Approval(_owner, spender, amount);\n    }\n\n    /**\n     * Read only function to retrieve the token balance of a given account.\n     *\n     * The `view` modifier indicates that it doesn't modify the contract's\n     * state, which allows us to call it without executing a transaction.\n     */\n    function balanceOf(address account) external view returns (uint256) {\n        return balances[account];\n    }\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
